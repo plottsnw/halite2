@@ -1,7 +1,0 @@
-C:\Users\Kille\OneDrive\Documents\Projects\Halite\Halite2\bin\Release\Halite2.pdb
-C:\Users\Kille\OneDrive\Documents\Projects\Halite\Halite2\obj\Release\Halite2.csproj.CoreCompileInputs.cache
-C:\Users\Kille\OneDrive\Documents\Projects\Halite\Halite2\obj\Release\Halite2.pdb
-C:\Users\Kille\OneDrive\Documents\Projects\Halite\Halite2\bin\Release\Halite2.exe
-C:\Users\Kille\OneDrive\Documents\Projects\Halite\Halite2\obj\Release\Halite2.exe
-C:\Users\Kille\OneDrive\Documents\Projects\Halite\Halite2\bin\Release\Halite2.exe.config
-C:\Users\Kille\OneDrive\Documents\Projects\Halite\Halite2\obj\Release\Halite2.csprojResolveAssemblyReference.cache
