@@ -64,7 +64,7 @@
     <Compile Include="hlt\ThrustMove.cs" />
     <Compile Include="hlt\UndockMove.cs" />
     <Compile Include="hlt\Util.cs" />
-    <Compile Include="MrBot.cs" />
+    <Compile Include="MyBot.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
