@@ -3,6 +3,7 @@ namespace Halite2.hlt
     public class Ship : Entity
     {
         public enum DockingStatus { Undocked = 0, Docking = 1, Docked = 2, Undocking = 3 }
+        public enum ShipType { NotSet = 0, Miner = 1, Attack = 2 }
 
         private DockingStatus dockingStatus;
         private int dockedPlanet;

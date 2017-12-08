@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace Halite2
 {
-    public class MyBot
+    public class MrBot
     {
         private static GameMap gameMap;
         private static int playerId;
@@ -27,7 +27,7 @@ namespace Halite2
         {
             //Debugger.Break();
 
-            //using (writer = new StreamWriter(@"C:\Users\Kille\OneDrive\Documents\GitHub\Halite\log.txt", false))
+            //using (writer = new StreamWriter(@"C:\Users\Kille\OneDrive\Documents\GitHub\Halite\log.log", false))
             {
                 //try
                 {
