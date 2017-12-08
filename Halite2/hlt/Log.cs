@@ -2,27 +2,21 @@
 
 namespace Halite2.hlt
 {
-    public class Log
+    public static class Log
     {
-        private TextWriter file;
-        private static Log instance;
+        private static StreamWriter writer;
 
-        private Log(TextWriter f)
+        public static void Initialize(StreamWriter w)
         {
-            file = f;
-        }
-
-        public static void Initialize(TextWriter f)
-        {
-            instance = new Log(f);
+            writer = w;
         }
 
         public static void LogMessage(string message)
         {
             try
             {
-                instance.file.WriteLine(message);
-                instance.file.Flush();
+                writer.WriteLine(message);
+                writer.Flush();
             }
             catch (IOException)
             {
