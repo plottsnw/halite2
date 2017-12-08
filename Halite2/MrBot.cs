@@ -182,7 +182,7 @@ namespace Halite2
 
         private static IEnumerable<Ship> GetAllUndockedShips()
         {
-            return gameMap.GetMyPlayer().GetShips().Values.Where(ship => ship.GetDockingStatus() == Ship.DockingStatus.Undocked);
+            return gameMap.GetMyPlayer().GetShips().Values.Where(ship => ship.DockingStatus == DockingStatus.Undocked);
         }
 
         private static Planet GetClosestPlanetToShip(Ship ship, IEnumerable<Planet> planets)

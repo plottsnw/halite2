@@ -21,7 +21,7 @@ namespace Halite2.hlt {
             metadata.Pop();
             metadata.Pop();
 
-            Ship.DockingStatus dockingStatus = (Ship.DockingStatus)int.Parse(metadata.Pop());
+            DockingStatus dockingStatus = (DockingStatus)int.Parse(metadata.Pop());
             int dockedPlanet = int.Parse(metadata.Pop());
             int dockingProgress = int.Parse(metadata.Pop());
             int weaponCooldown = int.Parse(metadata.Pop());

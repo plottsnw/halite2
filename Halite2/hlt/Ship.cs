@@ -1,45 +1,30 @@
 namespace Halite2.hlt
 {
+    public enum DockingStatus { Undocked = 0, Docking = 1, Docked = 2, Undocking = 3 }
+    public enum ShipType { NotSet = 0, Miner = 1, Attack = 2 }
+
     public class Ship : Entity
     {
-        public enum DockingStatus { Undocked = 0, Docking = 1, Docked = 2, Undocking = 3 }
-        public enum ShipType { NotSet = 0, Miner = 1, Attack = 2 }
-
-        private DockingStatus dockingStatus;
-        private int dockedPlanet;
-        private int dockingProgress;
-        private int weaponCooldown;
-
         public Ship(int owner, int id, double xPos, double yPos,
                     int health, DockingStatus dockingStatus, int dockedPlanet,
                     int dockingProgress, int weaponCooldown)
             : base(owner, id, xPos, yPos, health, Constants.SHIP_RADIUS)
         {
-            this.dockingStatus = dockingStatus;
-            this.dockedPlanet = dockedPlanet;
-            this.dockingProgress = dockingProgress;
-            this.weaponCooldown = weaponCooldown;
+            DockingStatus = dockingStatus;
+            DockedPlanet = dockedPlanet;
+            DockingProgress = dockingProgress;
+            WeaponCooldown = weaponCooldown;
         }
 
-        public int GetWeaponCooldown()
-        {
-            return weaponCooldown;
-        }
+        public ShipType Type { get; set; }
 
-        public DockingStatus GetDockingStatus()
-        {
-            return dockingStatus;
-        }
+        public int WeaponCooldown { get; private set; }
 
-        public int GetDockingProgress()
-        {
-            return dockingProgress;
-        }
+        public DockingStatus DockingStatus { get; private set; }
 
-        public int GetDockedPlanet()
-        {
-            return dockedPlanet;
-        }
+        public int DockingProgress { get; private set; }
+
+        public int DockedPlanet { get; set; }
 
         public bool CanDock(Planet planet)
         {
@@ -50,10 +35,10 @@ namespace Halite2.hlt
         {
             return "Ship[" +
                     base.ToString() +
-                    ", dockingStatus=" + dockingStatus +
-                    ", dockedPlanet=" + dockedPlanet +
-                    ", dockingProgress=" + dockingProgress +
-                    ", weaponCooldown=" + weaponCooldown +
+                    ", dockingStatus=" + DockingStatus +
+                    ", dockedPlanet=" + DockedPlanet +
+                    ", dockingProgress=" + DockingProgress +
+                    ", weaponCooldown=" + WeaponCooldown +
                     "]";
         }
     }
