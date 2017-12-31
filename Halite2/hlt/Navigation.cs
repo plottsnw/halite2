@@ -11,12 +11,9 @@ namespace Halite2.hlt
                 Entity dockTarget,
                 int maxThrust)
         {
-            int maxCorrections = Constants.MAX_NAVIGATION_CORRECTIONS;
-            bool avoidObstacles = true;
-            double angularStepRad = Math.PI / 180.0;
             Position targetPos = ship.GetClosestPoint(dockTarget);
 
-            return NavigateShipTowardsTarget(gameMap, ship, targetPos, maxThrust, avoidObstacles, maxCorrections, angularStepRad);
+            return NavigateShipTowardsTarget(gameMap, ship, targetPos, maxThrust);
         }
 
         public static ThrustMove NavigateShipTowardsTarget(
@@ -24,12 +21,13 @@ namespace Halite2.hlt
                 Ship ship,
                 Position targetPos,
                 int maxThrust,
-                bool avoidObstacles,
-                int maxCorrections,
-                double angularStepRad)
+                bool avoidObstacles = true,
+                int maxCorrections = Constants.MAX_NAVIGATION_CORRECTIONS,
+                double angularStepRad = Constants.NAVIGATION_CORRECTION_STEP)
         {
             if (maxCorrections <= 0)
             {
+                Log.LogMessage($"Pathfinding failed for ship {ship.GetId()}");
                 return null;
             }
 
@@ -42,7 +40,7 @@ namespace Halite2.hlt
                 double newTargetDy = Math.Sin(angleRad + angularStepRad) * distance;
                 Position newTarget = new Position(ship.GetXPos() + newTargetDx, ship.GetYPos() + newTargetDy);
 
-                return NavigateShipTowardsTarget(gameMap, ship, newTarget, maxThrust, true, (maxCorrections - 1), angularStepRad);
+                return NavigateShipTowardsTarget(gameMap, ship, newTarget, maxThrust, true, (maxCorrections - 1));
             }
 
             int thrust;
