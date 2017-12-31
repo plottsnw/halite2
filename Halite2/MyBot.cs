@@ -188,7 +188,7 @@ namespace Halite2
                 {
                     MoveToPlanetAndDock(moveList, bestPlanetChoice, ship);
                 }
-                else
+                else if (enemyPlanets.Any())
                 {
                     var planetAndDistance = GetClosestPlanetToShipWithDistance(ship, enemyPlanets);
                     var closestPlanet = planetAndDistance.Item1;
