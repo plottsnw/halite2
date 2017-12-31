@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 
 namespace Halite2
@@ -21,13 +20,13 @@ namespace Halite2
 
         private static List<Ship> undockedShips;
         private static List<Move> moveList;
-        //private static StreamWriter writer;
 
         public static void Main(string[] args)
         {
-            Debugger.Break();
+            //Debugger.Break();
+            Log.IsEnabled = false;
 
-            //try
+            try
             {
                 Networking networking = new Networking();
                 gameMap = networking.Initialize("MrBot");
@@ -45,18 +44,18 @@ namespace Halite2
                     //Game over
                 }
             }
-            //catch (Exception e)
-            //{
-            //    Log.LogMessage(e);
-            //    throw;
-            //}
+            catch (Exception e)
+            {
+                Log.LogMessage(e.ToString());
+                throw;
+            }
         }
 
         private static void PlayTurn()
         {
             DateTime turnStart = DateTime.UtcNow;
             turnCount++;
-            //Log.LogMessage($"Starting turn: {turnCount}");
+            Log.LogMessage($"Starting turn: {turnCount}");
 
             moveList = new List<Move>(500);
             gameMap.UpdateMap(Networking.ReadLineIntoMetadata());
@@ -66,6 +65,13 @@ namespace Halite2
             myPlanets = gameMap.GetAllPlanets().Values.Where(planet => planet.GetOwner() == playerId).ToList();
             dockableOwnedPlanets = myPlanets.Where(planet => planet.GetDockedShips().Count < planet.GetDockingSpots()).ToList();
 
+            //Log.LogMessage("Unowned planets:");
+            //unownedPlanets.ForEach((p) => Log.LogMessage(p.GetId().ToString()));
+            //Log.LogMessage("Dockable owned planets:");
+            //dockableOwnedPlanets.ForEach((p) => Log.LogMessage(p.GetId().ToString()));
+            //Log.LogMessage("Enemy owned planets:");
+            //enemyPlanets.ForEach((p) => Log.LogMessage(p.GetId().ToString()));
+
             undockedShips = GetAllUndockedShips().ToList();
             List<Planet> planetsToBeDocked = new List<Planet>(3);
 
@@ -73,15 +79,15 @@ namespace Halite2
             {
                 PlayEarlyGameTurn();
             }
-            else //if (turnCount >= 10 && turnCount < 50)
+            else if (turnCount >= 10 && turnCount < 50)
             {
                 PlayMidGameTurn(turnStart);
             }
-            //else
-            //{
-            //    //Only move ships that are close to planets to dock
-            //    PlayLateGameTurn(turnStart);
-            //}
+            else
+            {
+                //Only move ships that are close to planets to dock
+                PlayLateGameTurn(turnStart);
+            }
 
             Networking.SendMoves(moveList);
         }
@@ -95,12 +101,8 @@ namespace Halite2
 
             for (int i = 0; i < undockedShips.Count; i++)
             {
-                //Log.LogMessage("Ship: " + i);
                 Ship ship = shipsWithoutCommands[0];
-
-                //Log.LogMessage("Dockable planets: " + unownedPlanets.Count);
                 Planet planet = GetClosestPlanetToShip(ship, unownedPlanets);
-                //Log.LogMessage("Closest planet: " + planet?.ToString());
 
                 ship = GetClosestShipToPlanet(planet, shipsWithoutCommands);
 
@@ -128,13 +130,6 @@ namespace Halite2
         /// <param name="turnStart"></param>
         private static void PlayMidGameTurn(DateTime turnStart)
         {
-            //Log.LogMessage("Unowned planets:");
-            //unownedPlanets.ForEach((p) => Log.LogMessage(p.GetId().ToString()));
-            //Log.LogMessage("Dockable owned planets:");
-            //dockableOwnedPlanets.ForEach((p) => Log.LogMessage(p.GetId().ToString()));
-            //Log.LogMessage("Enemy owned planets:");
-            //enemyPlanets.ForEach((p) => Log.LogMessage(p.GetId().ToString()));
-
             for (int i = 0; i < undockedShips.Count; i++)
             {
                 Ship ship = undockedShips[i];
@@ -153,10 +148,10 @@ namespace Halite2
                     var closestPlanet = planetAndDistance.Item1;
                     var distanceToPlanet = planetAndDistance.Item2;
 
-                    ThrustMove newThrustMove = Navigation.NavigateShipTowardsTarget(gameMap, ship, closestPlanet, Constants.MAX_SPEED, distanceToPlanet > Constants.MAX_SPEED, 2, .1);
+                    ThrustMove newThrustMove = Navigation.NavigateShipTowardsTarget(gameMap, ship, closestPlanet, Constants.MAX_SPEED, distanceToPlanet > Constants.MAX_SPEED);
                     if (newThrustMove != null)
                     {
-                        //Log.LogMessage($"Sending ship {ship.GetId()} to destroy planet {closestPlanet.GetId()}");
+                        Log.LogMessage($"Sending ship {ship.GetId()} to destroy planet {closestPlanet.GetId()}");
                         moveList.Add(newThrustMove);
                     }
                 }
@@ -166,14 +161,14 @@ namespace Halite2
 
                 if (shipDelta > maxTimeInTicks - turnDelta)
                 {
-                    //Log.LogMessage($"Out of time on {i} out of {undockedShips.Count}");
+                    Log.LogMessage($"Out of time on {i} out of {undockedShips.Count}");
                     break;
                 }
             }
         }
 
         /// <summary>
-        /// 
+        /// Looks for an unowned planet within 50 units to dock at. Otherwise attacks.
         /// </summary>
         /// <param name="turnStart"></param>
         private static void PlayLateGameTurn(DateTime turnStart)
@@ -182,26 +177,27 @@ namespace Halite2
             {
                 Ship ship = undockedShips[i];
 
-                Planet closestUnownedPlanet = GetClosestPlanetToShipWithinDistance(ship, unownedPlanets, 35);
+                Planet bestPlanetChoice = GetClosestPlanetToShipWithinDistance(ship, unownedPlanets);
+                
+                if (bestPlanetChoice == null)
+                {
+                    bestPlanetChoice = GetClosestPlanetToShipWithinDistance(ship, dockableOwnedPlanets);
+                }
 
-                if (unownedPlanets.Any())
+                if (bestPlanetChoice != null)
                 {
-                    MoveToClosestPlanetAndDock(moveList, unownedPlanets, ship);
+                    MoveToPlanetAndDock(moveList, bestPlanetChoice, ship);
                 }
-                else if (dockableOwnedPlanets.Any())
-                {
-                    MoveToClosestPlanetAndDock(moveList, dockableOwnedPlanets, ship);
-                }
-                else if (enemyPlanets.Any())
+                else
                 {
                     var planetAndDistance = GetClosestPlanetToShipWithDistance(ship, enemyPlanets);
                     var closestPlanet = planetAndDistance.Item1;
                     var distanceToPlanet = planetAndDistance.Item2;
 
-                    ThrustMove newThrustMove = Navigation.NavigateShipTowardsTarget(gameMap, ship, closestPlanet, Constants.MAX_SPEED, distanceToPlanet > Constants.MAX_SPEED, 2, .1);
+                    ThrustMove newThrustMove = Navigation.NavigateShipTowardsTarget(gameMap, ship, closestPlanet, Constants.MAX_SPEED, distanceToPlanet > Constants.MAX_SPEED);
                     if (newThrustMove != null)
                     {
-                        //Log.LogMessage($"Sending ship {ship.GetId()} to destroy planet {closestPlanet.GetId()}");
+                        Log.LogMessage($"Sending ship {ship.GetId()} to destroy planet {closestPlanet.GetId()}");
                         moveList.Add(newThrustMove);
                     }
                 }
@@ -211,7 +207,7 @@ namespace Halite2
 
                 if (shipDelta > maxTimeInTicks - turnDelta)
                 {
-                    //Log.LogMessage($"Out of time on {i} out of {undockedShips.Count}");
+                    Log.LogMessage($"Out of time on {i} out of {undockedShips.Count}");
                     break;
                 }
             }
@@ -220,18 +216,22 @@ namespace Halite2
         private static void MoveToClosestPlanetAndDock(List<Move> moveList, List<Planet> unownedPlanets, Ship ship)
         {
             Planet closestPlanet = GetClosestPlanetToShip(ship, unownedPlanets);
+            MoveToPlanetAndDock(moveList, closestPlanet, ship);
+        }
 
-            if (ship.CanDock(closestPlanet))
+        private static void MoveToPlanetAndDock(List<Move> moveList, Planet planet, Ship ship)
+        {
+            if (ship.CanDock(planet))
             {
-                //Log.LogMessage($"Sending ship {ship.GetId()} to dock on planet {closestPlanet.GetId()}");
-                moveList.Add(new DockMove(ship, closestPlanet));
+                Log.LogMessage($"Docking ship {ship.GetId()} on planet {planet.GetId()}");
+                moveList.Add(new DockMove(ship, planet));
             }
             else
             {
-                ThrustMove newThrustMove = Navigation.NavigateShipToDock(gameMap, ship, closestPlanet, Constants.MAX_SPEED);
+                ThrustMove newThrustMove = Navigation.NavigateShipToDock(gameMap, ship, planet, Constants.MAX_SPEED);
                 if (newThrustMove != null)
                 {
-                    //Log.LogMessage($"Sending ship {ship.GetId()} to move to planet {closestPlanet.GetId()}");
+                    Log.LogMessage($"Sending ship {ship.GetId()} to move to planet {planet.GetId()}");
                     moveList.Add(newThrustMove);
                 }
             }
@@ -247,7 +247,7 @@ namespace Halite2
             return GetClosestPlanetToShipWithDistance(ship, planets).Item1;
         }
 
-        private static Planet GetClosestPlanetToShipWithinDistance(Ship ship, IEnumerable<Planet> planets, int distance)
+        private static Planet GetClosestPlanetToShipWithinDistance(Ship ship, IEnumerable<Planet> planets, int distance = 50)
         {
             return GetClosestPlanetToShipWithDistance(ship, planets, distance).Item1;
         }
@@ -265,7 +265,7 @@ namespace Halite2
             double closestDistance = 99999999d;
             double testDistance;
 
-            foreach (Planet planet in planets)
+            foreach (Planet planet in filteredPlanets)
             {
                 testDistance = ship.GetDistanceTo(planet);
 
