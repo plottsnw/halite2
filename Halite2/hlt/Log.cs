@@ -6,6 +6,8 @@ namespace Halite2.hlt
     {
         private static StreamWriter writer;
 
+        public static bool IsEnabled { get; set; } = true;
+
         public static void Initialize(StreamWriter w)
         {
             writer = w;
@@ -13,13 +15,16 @@ namespace Halite2.hlt
 
         public static void LogMessage(string message)
         {
-            try
+            if (IsEnabled)
             {
-                writer.WriteLine(message);
-                writer.Flush();
-            }
-            catch (IOException)
-            {
+                try
+                {
+                    writer.WriteLine(message);
+                    writer.Flush();
+                }
+                catch (IOException)
+                {
+                } 
             }
         }
     }
