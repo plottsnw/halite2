@@ -32,7 +32,7 @@ namespace Halite2
                 }
                 else if (EnemyPlanets.Any())
                 {
-                    AttackClosestEnemyPlanet(ship);
+                    AttackDockedShipsAtClosestEnemyPlanet(ship);
                 }
 
                 if (AreAboutToTimeOut(i)) break;

@@ -66,6 +66,38 @@ namespace Halite2
             }
         }
 
+        protected void AttackDockedShipsAtClosestEnemyPlanet(Ship ship)
+        {
+            Planet closestEnemyPlanet = Navigation.GetClosestPlanetToShip(ship, EnemyPlanets);
+            var closestDockedEnemyShips = closestEnemyPlanet.GetDockedShips().Select(id => GameMap.GetShip(closestEnemyPlanet.GetOwner(), id));
+
+            if (closestDockedEnemyShips.Any())
+            {
+                Log.LogMessage($"closestDockedEnemyShips length: {closestDockedEnemyShips.Count()}");
+                Tuple<Ship, double> closestDockedEnemyShipAndDistance = ship.GetClosestEntityFromListWithDistance(closestDockedEnemyShips);
+                int thrust = GetThrustToAttackShip(closestDockedEnemyShipAndDistance.Item2);
+
+                ThrustMove newThrustMove = Navigation.NavigateShipTowardsTarget(GameMap, ship, closestDockedEnemyShipAndDistance.Item1, thrust);
+                if (newThrustMove != null)
+                {
+                    Log.LogMessage($"Sending ship {ship.GetId()} to destroy enemy docked ship {closestDockedEnemyShipAndDistance.Item1.GetId()}");
+                    MoveList.Add(newThrustMove);
+                } 
+            }
+        }
+
+        private int GetThrustToAttackShip(double distanceBetweenShips)
+        {
+            int thrust = Constants.MAX_SPEED;
+
+            if (distanceBetweenShips < Constants.MAX_SPEED)
+            {
+                thrust = (int)distanceBetweenShips - 2;
+            }
+
+            return thrust;
+        }
+
         protected bool AreAboutToTimeOut(int turnCount)
         {
             double turnDelta = DateTime.UtcNow.Ticks - TurnStart.Ticks;

@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+
 namespace Halite2.hlt
 {
 
@@ -36,6 +39,16 @@ namespace Halite2.hlt
         public override double GetRadius()
         {
             return radius;
+        }
+
+        public T GetClosestEntityFromList<T>(IEnumerable<T> entities) where T : Entity
+        {
+            return Navigation.GetClosestEntityToEntityFromList(this, entities);
+        }
+
+        public Tuple<T, double> GetClosestEntityFromListWithDistance<T>(IEnumerable<T> entities) where T : Entity
+        {
+            return Navigation.GetClosestEntityToEntityFromListWithDistance(this, entities);
         }
 
         public override string ToString()

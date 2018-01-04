@@ -21,23 +21,29 @@ namespace Halite2
                 Networking networking = new Networking();
                 gameMap = networking.Initialize("MrBot");
 
-                //try
+                try
                 {
                     while (true)
                     {
                         PlayTurn();
                     }
                 }
-                //catch (FormatException)
-                //{
-                //    //Game over
-                //}
+                catch (FormatException)
+                {
+                    //Game over
+                    foreach (Player player in gameMap.GetAllPlayers())
+                    {
+                        Log.LogMessage($"Player {player.GetId()} has {player.GetShips().Count} ships remaining");
+                    }
+                }
             }
             catch (Exception e)
             {
                 Log.LogMessage(e.ToString());
                 throw;
             }
+
+            Console.ReadKey();
         }
 
         private static void PlayTurn()

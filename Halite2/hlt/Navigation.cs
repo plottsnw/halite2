@@ -45,6 +45,12 @@ namespace Halite2.hlt
                 thrust = maxThrust;
             }
 
+            if (thrust < 0)
+            {
+                angleRad += Math.PI;
+                thrust *= -1;
+            }
+
             int angleDeg = Util.AngleRadToDegClipped(angleRad);
 
             return new ThrustMove(ship, angleDeg, thrust);
@@ -105,6 +111,35 @@ namespace Halite2.hlt
             }
 
             return closest;
+        }
+
+        public static U GetClosestEntityToEntityFromList<T, U>(T baseEntity, IEnumerable<U> entities)
+            where T : Entity
+            where U : Entity
+        {
+            return GetClosestEntityToEntityFromListWithDistance(baseEntity, entities).Item1;
+        }
+
+        public static Tuple<U, double> GetClosestEntityToEntityFromListWithDistance<T, U>(T baseEntity, IEnumerable<U> entities)
+            where T : Entity
+            where U : Entity
+        {
+            U closest = default(U);
+            double closestDistance = 99999999d;
+            double testDistance;
+
+            foreach (U entity in entities)
+            {
+                testDistance = entity.GetDistanceTo(baseEntity);
+
+                if (testDistance < closestDistance)
+                {
+                    closest = entity;
+                    closestDistance = testDistance;
+                }
+            }
+
+            return new Tuple<U, double>(closest, closestDistance);
         }
     }
 }
