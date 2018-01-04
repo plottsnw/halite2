@@ -46,6 +46,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="EarlyGameTurn.cs" />
     <Compile Include="hlt\Collision.cs" />
     <Compile Include="hlt\Constants.cs" />
     <Compile Include="hlt\DockMove.cs" />
@@ -64,8 +65,12 @@
     <Compile Include="hlt\ThrustMove.cs" />
     <Compile Include="hlt\UndockMove.cs" />
     <Compile Include="hlt\Util.cs" />
+    <Compile Include="LateGameTurn.cs" />
+    <Compile Include="MidGameTurn.cs" />
     <Compile Include="MyBot.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Turn.cs" />
+    <Compile Include="TurnFactory.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
