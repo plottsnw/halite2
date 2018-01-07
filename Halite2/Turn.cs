@@ -37,10 +37,8 @@ namespace Halite2
             MoveList = new List<Move>(500);
             GameMap.UpdateMap(Networking.ReadLineIntoMetadata());
 
-            UnownedPlanets = GameMap.GetAllPlanets().Values.Where(planet => !planet.IsOwned()).ToList();
-            EnemyPlanets = GameMap.GetAllPlanets().Values.Where(planet => planet.GetOwner() != GameMap.GetMyPlayerId()).ToList();
-            OwnedPlanets = GameMap.GetAllPlanets().Values.Where(planet => planet.GetOwner() == GameMap.GetMyPlayerId()).ToList();
-            DockableOwnedPlanets = OwnedPlanets.Where(planet => planet.GetDockedShips().Count < planet.GetDockingSpots()).ToList();
+            UpdatePlanetLists();
+            RefreshShipRoster();
 
             UndockedShips = GetAllUndockedShips();
 
@@ -50,6 +48,37 @@ namespace Halite2
             //dockableOwnedPlanets.ForEach((p) => Log.LogMessage(p.GetId().ToString()));
             //Log.LogMessage("Enemy owned planets:");
             //enemyPlanets.ForEach((p) => Log.LogMessage(p.GetId().ToString()));
+        }
+
+        private void UpdatePlanetLists()
+        {
+            UnownedPlanets = GameMap.GetAllPlanets().Values.Where(planet => !planet.IsOwned()).ToList();
+            EnemyPlanets = GameMap.GetAllPlanets().Values.Where(planet => planet.GetOwner() != GameMap.GetMyPlayerId()).ToList();
+            OwnedPlanets = GameMap.GetAllPlanets().Values.Where(planet => planet.GetOwner() == GameMap.GetMyPlayerId()).ToList();
+            DockableOwnedPlanets = OwnedPlanets.Where(planet => planet.GetDockedShips().Count < planet.GetDockingSpots()).ToList();
+        }
+
+        private void RefreshShipRoster()
+        {
+            var ships = GameMap.GetMyPlayer().GetShips();
+            var destroyedShips = ShipRoster.Roster.Where((idShipPair) => !ships.ContainsKey(idShipPair.Key)).ToList();
+
+            foreach (var kvp in destroyedShips)
+            {
+                ShipRoster.Roster.Remove(kvp.Key);
+            }
+
+            foreach (var kvp in ships)
+            {
+                if (ShipRoster.Roster.ContainsKey(kvp.Key))
+                {
+                    ShipRoster.Roster[kvp.Key].Ship = ships[kvp.Key];
+                }
+                else
+                {
+                    ShipRoster.Roster.Add(kvp.Key, new ShipWrapper(kvp.Value)); 
+                }
+            }
         }
 
         protected void AttackClosestEnemyPlanet(Ship ship)
@@ -82,7 +111,7 @@ namespace Halite2
                 {
                     Log.LogMessage($"Sending ship {ship.GetId()} to destroy enemy docked ship {closestDockedEnemyShipAndDistance.Item1.GetId()}");
                     MoveList.Add(newThrustMove);
-                } 
+                }
             }
         }
 
